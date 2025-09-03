@@ -2,8 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "../hooks/useWallet";
-import { Wallet, ExternalLink, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { Wallet, ExternalLink, AlertCircle, CheckCircle, Loader2, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState } from "react";
 
 export const WalletCard = () => {
   const { 
@@ -15,22 +16,39 @@ export const WalletCard = () => {
     balance,
     connect, 
     disconnect, 
-    isMetamaskInstalled 
+    isMetamaskInstalled,
   } = useWallet();
 
-  // TODO: Implement address formatting
+  const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
+
+  // Format address to show first 6 and last 4 characters
   const formatAddress = (addr: string): string => {
-    // Implementation needed: Format address to show first 6 and last 4 characters
-    // Example: "0x1234...abcd"
-    return addr; // Placeholder
+    if (addr.length <= 10) return addr;
+    return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
   };
 
-  // TODO: Implement chain name mapping
+  // Map chain IDs to human-readable names
   const getChainName = (id: string): string => {
-    // Implementation needed: Map chain IDs to human-readable names
-    // Common chains: 0x1 (Ethereum), 0x5 (Goerli), 0xaa36a7 (Sepolia)
-    return `Chain ${id}`; // Placeholder
+    const chainIdMap: Record<string, string> = {
+      '0x1': 'Ethereum Mainnet',
+      '0x5': 'Goerli Testnet',
+      '0xaa36a7': 'Sepolia Testnet',
+      '0x89': 'Polygon Mainnet',
+      '0x13881': 'Mumbai Testnet',
+      '0xa4b1': 'Arbitrum One',
+      '0xa': 'Optimism',
+    };
+    
+    return chainIdMap[id] || `Chain ${id}`;
   };
+
+  // Common networks for switching
+  const commonNetworks = [
+    { id: '0x1', name: 'Ethereum Mainnet' },
+    { id: '0x5', name: 'Goerli Testnet' },
+    { id: '0xaa36a7', name: 'Sepolia Testnet' },
+    { id: '0x89', name: 'Polygon Mainnet' },
+  ];
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -89,14 +107,40 @@ export const WalletCard = () => {
               {chainId && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Network</span>
-                  <span className="text-sm">{getChainName(chainId)}</span>
+                  <div className="relative">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 px-2 text-sm"
+                      onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
+                    >
+                      {getChainName(chainId)}
+                      <ChevronDown className="ml-1 h-3 w-3" />
+                    </Button>
+                    
+                    {showNetworkDropdown && (
+                      <div className="absolute right-0 mt-1 w-48 rounded-md border bg-background shadow-lg z-10">
+                        {commonNetworks.map(network => (
+                          <div 
+                            key={network.id}
+                            className="px-4 py-2 text-sm hover:bg-muted cursor-pointer"
+                            onClick={() => {
+                              setShowNetworkDropdown(false);
+                            }}
+                          >
+                            {network.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               
               {balance && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Balance</span>
-                  <span className="text-sm font-mono">{balance} ETH</span>
+                  <span className="text-sm font-mono">{Number(balance).toFixed(4)} ETH</span>
                 </div>
               )}
             </div>
@@ -136,3 +180,10 @@ export const WalletCard = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
