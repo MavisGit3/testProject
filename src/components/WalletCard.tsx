@@ -17,6 +17,7 @@ export const WalletCard = () => {
     connect, 
     disconnect, 
     isMetamaskInstalled,
+    switchNetwork
   } = useWallet();
 
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
@@ -125,6 +126,7 @@ export const WalletCard = () => {
                             key={network.id}
                             className="px-4 py-2 text-sm hover:bg-muted cursor-pointer"
                             onClick={() => {
+                              switchNetwork(network.id);
                               setShowNetworkDropdown(false);
                             }}
                           >
@@ -180,10 +182,3 @@ export const WalletCard = () => {
     </div>
   );
 };
-
-
-
-
-
-
-
